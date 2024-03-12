@@ -22,30 +22,24 @@ const ArticlePage = ({ id, brand, style, quantity, country }) => {
         }
     };
 
-
     return (
         <>
             <div className="container-card-beer">
                 <Link to={`/beers/${id}`}>
-                    <div className="details">
-                        <RiBeerFill />
-                        <p>plus de détails</p>
+                    <div className="card-beer">
+                        <div className="delete">
+                            <FiX onClick={openModal} />
+                        </div>
+                        <div><RiBeerFill size={80} /></div>
+                        <div className="txt-card">
+                            <h3>{brand}</h3>
+                            <h4>{style}</h4>
+                            <h4>{country.name}</h4>
+                            <p>Quantité en stock : {quantity}</p>
+                        </div>
+                        {/* <p>plus de détails</p> */}
                     </div>
                 </Link>
-                <div className="card-beer">
-                    <div className="card-left">
-                        <div>{brand}</div>
-                        <div>{style}</div>
-                        <div>{country.name}</div>
-                    </div>
-                    <div className="card-right">
-                        Quantité en stock : {quantity}
-                    </div>
-                    <div className="delete">
-                        <FiX onClick={openModal} />
-                    </div>
-
-                </div>
             </div>
             <Modal isOpen={isOpen} onRequestClose={closeModal} className="modal">
                 <h2>Êtes-vous sûr de vouloir supprimer cette bière ?</h2>

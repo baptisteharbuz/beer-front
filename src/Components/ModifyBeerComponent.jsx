@@ -4,7 +4,7 @@ import BeersService from "../Services/BeersService";
 import CountriesService from "../Services/PaysService"
 import { toast } from 'react-toastify';
 import Select from 'react-select';
-
+import BarsService from "../Services/BarsService"
 
 const ModifyBeer = ({ isOpen, onClose, beers }) => {
 
@@ -13,16 +13,22 @@ const ModifyBeer = ({ isOpen, onClose, beers }) => {
     const [countryId, setCountryId] = useState('');
     const [quantity, setQuantity] = useState(beers.quantity || "");
     const [countries, setCountries] = useState([])
+    const [bars, setBars] = useState([]);
+    const [selectedBars, setSelectedBars] = useState([]);
 
-    const fetchCountries = async () => {
+    const fetchCountriesAndBars = async () => {
         try {
-            const response = await CountriesService.getCountry();
-            setCountries(response.data)
+            const countriesResponse = await CountriesService.getCountry();
+            setCountries(countriesResponse.data);
+
+            const barsResponse = await BarsService.getAllBars();
+            setBars(barsResponse.data);
+            const selectedBarIds = beers.bars.map(bar => bar.id);
+            setSelectedBars(selectedBarIds);
         } catch (e) {
-            console.log(e)
+            console.log(e);
         }
     };
-
 
     const modifyBeer = (b) => {
         b.preventDefault();
@@ -31,6 +37,7 @@ const ModifyBeer = ({ isOpen, onClose, beers }) => {
             style: style,
             country_id: countryId,
             quantity: quantity,
+            bars: selectedBars,
         }
         console.log(newdata)
         BeersService.modifyBeer(beers.id, newdata)
@@ -45,9 +52,17 @@ const ModifyBeer = ({ isOpen, onClose, beers }) => {
 
 
     useEffect(() => {
-        fetchCountries();
+        fetchCountriesAndBars();
     }, []);
 
+
+    const handleBarSelectionChange = (barId) => {
+        setSelectedBars(prevSelectedBars =>
+            prevSelectedBars.includes(barId)
+                ? prevSelectedBars.filter(id => id !== barId)
+                : [...prevSelectedBars, barId]
+        );
+    };
 
     return (<>
         <Modal isOpen={isOpen} onRequestClose={onClose}>
@@ -65,13 +80,27 @@ const ModifyBeer = ({ isOpen, onClose, beers }) => {
                     <div>
                         <Select
                             name="country"
-                            value={countries.find(c => c.id === countryId) || { value: '', label: 'Sélectionner un pays' }}
+                            value={countries.find(c => c.id === countryId) || ''}
                             onChange={(selectedOption) => setCountryId(selectedOption ? selectedOption.value : '')}
                             options={countries.map((c) => ({
                                 value: c.id,
                                 label: c.name,
                             }))}
                         />
+                    </div>
+                    <div className="scroll-bars">
+                        {bars.map(bar => (
+                            <div key={bar.id}>
+                                <input
+                                    type="checkbox"
+                                    id={`bar-${bar.id}`}
+                                    checked={selectedBars.includes(bar.id)}
+                                    onChange={() => handleBarSelectionChange(bar.id)}
+                                />
+                                <label htmlFor={`bar-${bar.id}`}>{bar.name}</label>
+
+                            </div>
+                        ))}
                     </div>
                     <div>
                         <label htmlFor="quantity">Quantité :</label>

@@ -12,7 +12,6 @@ const Beers = () => {
         try {
             const response = await BeersService.getBeers();
             setBeers(response.data)
-            console.log(response)
         } catch {
 
         }
@@ -22,21 +21,23 @@ const Beers = () => {
     }, []);
 
     return (<>
-        <div className="container-beer">
+        <div className="container-beers-page">
             <h1>Beers & Co</h1>
             <button onClick={() => setIsAddBeerModalOpen(true)}>Ajouter une nouvelle bière</button>
-            {beers.map((beer) => {
-                return (
-                    <BeerComponent key={beer.id} {...beer} />
-                );
-            })}
+            <div className="container-beer">
+                {beers.map((beer) => {
+                    return (
+                        <BeerComponent key={beer.id} {...beer} />
+                    );
+                })}
+            </div>
+            {isAddBeerModalOpen && (
+                <AddBeerComponent
+                    isOpen={isAddBeerModalOpen}
+                    onClose={() => setIsAddBeerModalOpen(false)}
+                />
+            )}
         </div>
-        {isAddBeerModalOpen && (
-            <AddBeerComponent
-                isOpen={isAddBeerModalOpen}
-                onClose={() => setIsAddBeerModalOpen(false)}
-            />
-        )}
     </>);
 }
 

@@ -4,6 +4,7 @@ import BeersService from "../Services/BeersService";
 import { toast } from 'react-toastify';
 import CountriesService from "../Services/PaysService"
 import Select from 'react-select';
+import BarsService from "../Services/BarsService"
 
 const AddBeer = ({ isOpen, onClose }) => {
 
@@ -12,14 +13,18 @@ const AddBeer = ({ isOpen, onClose }) => {
     const [countryId, setCountryId] = useState('');
     const [quantity, setQuantity] = useState('');
     const [countries, setCountries] = useState([])
+    const [bars, setBars] = useState([]);
+    const [selectedBars, setSelectedBars] = useState([]);
 
-
-    const fetchCountries = async () => {
+    const fetchCountriesAndBars = async () => {
         try {
-            const response = await CountriesService.getCountry();
-            setCountries(response.data)
+            const countriesResponse = await CountriesService.getCountry();
+            setCountries(countriesResponse.data);
+
+            const barsResponse = await BarsService.getAllBars();
+            setBars(barsResponse.data);
         } catch (e) {
-            console.log(e)
+            console.log(e);
         }
     };
 
@@ -30,6 +35,7 @@ const AddBeer = ({ isOpen, onClose }) => {
             style: style,
             country_id: countryId,
             quantity: quantity,
+            bars: selectedBars,
         }
         console.log(newBeer)
         BeersService.addBeer(newBeer)
@@ -43,8 +49,16 @@ const AddBeer = ({ isOpen, onClose }) => {
     };
 
     useEffect(() => {
-        fetchCountries();
+        fetchCountriesAndBars();
     }, []);
+
+    const handleBarSelectionChange = (barId) => {
+        setSelectedBars(prevSelectedBars =>
+            prevSelectedBars.includes(barId)
+                ? prevSelectedBars.filter(id => id !== barId)
+                : [...prevSelectedBars, barId]
+        );
+    };
 
     return (<>
         <Modal isOpen={isOpen} onRequestClose={onClose}>
@@ -73,6 +87,20 @@ const AddBeer = ({ isOpen, onClose }) => {
                     <div>
                         <label htmlFor="quantity">Quantité :</label>
                         <input type="number" id="quantity" value={quantity} onChange={(b) => setQuantity(b.target.value)} />
+                    </div>
+                    <div className="scroll-bars">
+                        {bars.map(bar => (
+                            <div key={bar.id}>
+                                <input
+                                    type="checkbox"
+                                    id={`bar-${bar.id}`}
+                                    checked={selectedBars.includes(bar.id)}
+                                    onChange={() => handleBarSelectionChange(bar.id)}
+                                />
+                                <label htmlFor={`bar-${bar.id}`}>{bar.name}</label>
+
+                            </div>
+                        ))}
                     </div>
                     <button type="submit">Ajouter</button>
                 </form>
